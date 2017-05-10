@@ -82,6 +82,6 @@ export default class Elevator {
     this.currRiders = []
     this.direction = 'none'
     this.totalTraversed = 0
-    this.totalStops = 0
+    this.stops = []
   }
 }
