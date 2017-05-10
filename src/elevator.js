@@ -3,23 +3,30 @@ export default class Elevator {
     this.currFloor = options.currFloor || 0
     this.totalStops = options.totalStops || 0
     this.totalTraversed = options.totalTraversed || 0
-    this.requests = options.requests || []
-    this.pickups = options.pickups || []
-    this.dropoffs = options.dropoffs || []
+    this.requestQueue = options.requests || []
     this.currRiders = options.currRiders || []
     this.status = options.status || 'idle'
     this.direction = options.direction || 'none'
     this.stops = options.stops || []
   }
 
-  addRequest(user, start, end) {
-    this.requests.push({ user, start, end })
-    this.pickups.push(start)
-    this.dropoffs.push(end)
+  addRequest(user) {
+    this.requestQueue.push(user)
+  }
+
+  next() {
+    const nextRider = this.requestQueue.shift()
+    const { startFloor, endFloor } = nextRider
+
+    if (this.currFloor !== startFloor) {
+      this.addRider(nextRider)
+      this.goToFloor(startFloor)
+    }
+    this.goToFloor(endFloor)
+    this.removeRiders()
   }
 
   goToFloor(n) {
-    this.stops.push(this.currFloor)
     this.status = 'moving'
     if (this.currFloor < n) {
       while (this.currFloor < n) {
@@ -27,12 +34,16 @@ export default class Elevator {
         this.moveUp()
         this.totalTraversed += 1
       }
-    } else {
+    } else if (this.currFloor > n) {
       while (this.currFloor > n) {
         this.direction = 'down'
         this.moveDown()
         this.totalTraversed += 1
       }
+    } else if (this.currFloor === n) {
+      this.status = 'idle'
+      this.direction = 'none'
+      return
     }
     this.totalStops += 1
     this.status = 'idle'
@@ -45,7 +56,19 @@ export default class Elevator {
   }
 
   moveDown() {
-    this.currFloor -= 1
+    if (this.currFloor !== 0) {
+      this.currFloor -= 1
+    }
+  }
+
+  addRider(rider) {
+    this.currRiders.push(rider)
+  }
+
+  removeRiders() {
+    this.currRiders = this.currRiders.filter(rider => {
+      return rider.endFloor !== this.currFloor
+    })
   }
 
   reset() {

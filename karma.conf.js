@@ -26,7 +26,7 @@ module.exports = function (config) {
         error: 'red',
       },
       mochaReporter: {
-        showDiff: 'unified',
+        showDiff: 'true',
       },
     },
     client: {
